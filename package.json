@@ -10,6 +10,7 @@
     "dev:server": "bun run --filter @sentrix/server dev",
     "dev:dashboard": "bun run --filter @sentrix/dashboard dev",
     "dev:agent": "bun run demo/agent.ts",
+    "seed": "bun run packages/server/src/db/seed.ts",
     "dev": "bun run dev:server & bun run dev:dashboard"
   }
 }

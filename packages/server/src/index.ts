@@ -4,6 +4,7 @@ import agents from "./routes/agents.js";
 import events from "./routes/events.js";
 import transactions from "./routes/transactions.js";
 import webhook from "./routes/webhook.js";
+import anomalies from "./routes/anomalies.js";
 import { addClient, removeClient, getClientCount } from "./ws/hub.js";
 
 const app = new Hono();
@@ -14,6 +15,7 @@ app.route("/api/agents", agents);
 app.route("/api/events", events);
 app.route("/api/transactions", transactions);
 app.route("/webhook", webhook);
+app.route("/api/anomalies", anomalies);
 
 app.get("/health", (c) =>
   c.json({

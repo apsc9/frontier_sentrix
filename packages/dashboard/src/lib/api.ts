@@ -53,6 +53,16 @@ export const api = {
       return get<any[]>(`/events${q ? `?${q}` : ""}`);
     },
   },
+  anomalies: {
+    list: (params?: { agentId?: string; severity?: string; limit?: number }) => {
+      const qs = new URLSearchParams();
+      if (params?.agentId) qs.set("agentId", params.agentId);
+      if (params?.severity) qs.set("severity", params.severity);
+      if (params?.limit) qs.set("limit", String(params.limit));
+      const q = qs.toString();
+      return get<any[]>(`/anomalies${q ? `?${q}` : ""}`);
+    },
+  },
   transactions: {
     list: (params?: { agentId?: string; status?: string; limit?: number }) => {
       const qs = new URLSearchParams();

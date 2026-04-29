@@ -34,7 +34,7 @@ export function EventLog({ agentId }: { agentId?: string }) {
       <div className="px-4 py-3 border-b border-white/5">
         <h3 className="text-sm font-semibold text-gray-300">Event Log</h3>
       </div>
-      <div className="divide-y divide-white/5 max-h-80 overflow-y-auto">
+      <div className="divide-y divide-white/5 max-h-96 overflow-y-auto">
         {events.map((evt) => (
           <div
             key={evt.id}

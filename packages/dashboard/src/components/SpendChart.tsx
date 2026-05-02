@@ -6,10 +6,17 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import { api } from "../lib/api";
 
-export function SpendChart({ agentId }: { agentId?: string }) {
+interface SpendChartProps {
+  agentId?: string;
+  tick: number;
+  selectedAgent?: any;
+}
+
+export function SpendChart({ agentId, tick, selectedAgent }: SpendChartProps) {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -26,47 +33,75 @@ export function SpendChart({ agentId }: { agentId?: string }) {
         .map(([time, sol]) => ({ time, sol: +sol.toFixed(4) }));
       setData(sorted);
     });
-  }, [agentId]);
+  }, [agentId, tick]);
 
-  if (data.length === 0) return null;
+  if (data.length === 0) {
+    return (
+      <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-4 text-center text-zinc-600 text-sm animate-fade-up">
+        No spend data
+      </div>
+    );
+  }
+
+  const config = selectedAgent?.config;
+  const threshold = config?.hourlySpendLimit ?? null;
 
   return (
-    <div className="bg-surface-raised rounded-xl p-4 border border-white/5">
-      <h3 className="text-sm font-semibold text-gray-300 mb-4">
-        Spend Over Time (SOL)
+    <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-4 animate-fade-up stagger-1">
+      <h3 className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mb-4">
+        Spend Over Time
       </h3>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data}>
           <defs>
             <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+              <stop offset="0%" stopColor="#34d399" stopOpacity={0.25} />
+              <stop offset="70%" stopColor="#34d399" stopOpacity={0.05} />
+              <stop offset="100%" stopColor="#34d399" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="time"
-            tick={{ fill: "#6b7280", fontSize: 11 }}
+            tick={{ fill: "#52525b", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: "#6b7280", fontSize: 11 }}
+            tick={{ fill: "#52525b", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
-            width={50}
+            width={40}
+            tickFormatter={(v) => `${v}`}
           />
           <Tooltip
             contentStyle={{
-              background: "#1a1d2e",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 8,
-              fontSize: 12,
+              background: "#18181b",
+              border: "1px solid rgba(63, 63, 70, 0.5)",
+              borderRadius: 6,
+              fontSize: 11,
+              color: "#d4d4d8",
             }}
+            formatter={(value: number) => [`${value.toFixed(4)} SOL`, "Spend"]}
           />
+          {threshold && (
+            <ReferenceLine
+              y={threshold}
+              stroke="#f59e0b"
+              strokeDasharray="4 4"
+              strokeOpacity={0.6}
+              label={{
+                value: `Limit: ${threshold} SOL/hr`,
+                position: "right",
+                fill: "#f59e0b",
+                fontSize: 9,
+                opacity: 0.7,
+              }}
+            />
+          )}
           <Area
             type="monotone"
             dataKey="sol"
-            stroke="#6366f1"
+            stroke="#34d399"
             fill="url(#spendGrad)"
             strokeWidth={2}
           />

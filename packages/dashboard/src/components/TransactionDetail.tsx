@@ -1,21 +1,11 @@
+import { useEffect } from "react";
 import { cn } from "../lib/cn";
+import { PROGRAM_NAMES } from "../lib/programs";
 
 const statusStyles: Record<string, string> = {
-  confirmed: "bg-success/20 text-success",
-  sent: "bg-yellow-500/20 text-yellow-400",
-  blocked: "bg-danger/20 text-danger",
-};
-
-const PROGRAM_NAMES: Record<string, string> = {
-  "11111111111111111111111111111111": "System Program",
-  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA": "Token Program",
-  "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb": "Token 2022",
-  "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL": "Associated Token",
-  "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4": "Jupiter v6",
-  "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc": "Orca Whirlpool",
-  "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8": "Raydium AMM",
-  "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky": "Marinade",
-  "ComputeBudget111111111111111111111111111111": "Compute Budget",
+  confirmed: "bg-emerald-500/15 text-emerald-400",
+  sent: "bg-amber-500/15 text-amber-400",
+  blocked: "bg-red-500/15 text-red-400",
 };
 
 interface TransactionDetailProps {
@@ -24,76 +14,89 @@ interface TransactionDetailProps {
 }
 
 export function TransactionDetail({ tx, onClose }: TransactionDetailProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-surface-raised rounded-2xl border border-white/10 w-full max-w-lg max-h-[80vh] overflow-y-auto"
+        className="bg-zinc-900 border border-zinc-800/80 rounded-lg w-full max-w-lg max-h-[80vh] overflow-y-auto animate-fade-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">Transaction Detail</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-lg leading-none">&times;</button>
+        <div className="px-5 py-3 border-b border-zinc-800/50 flex items-center justify-between">
+          <h3 className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+            Transaction Detail
+          </h3>
+          <button onClick={onClose} className="text-zinc-600 hover:text-zinc-300 text-lg leading-none transition-colors">
+            &times;
+          </button>
         </div>
 
         <div className="p-5 space-y-4">
           <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-wide">Signature</label>
-            <p className="text-xs font-mono text-gray-300 mt-1 break-all">{tx.signature}</p>
+            <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Signature</label>
+            <p className="text-[11px] font-mono text-zinc-300 mt-1 break-all select-all">{tx.signature}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] text-gray-500 uppercase tracking-wide">Status</label>
+              <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Status</label>
               <div className="mt-1">
-                <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", statusStyles[tx.status] ?? "bg-white/10 text-gray-400")}>
+                <span className={cn("text-[10px] px-2 py-0.5 rounded font-medium", statusStyles[tx.status] ?? "bg-zinc-800 text-zinc-400")}>
                   {tx.status}
                 </span>
               </div>
             </div>
             <div>
-              <label className="text-[10px] text-gray-500 uppercase tracking-wide">Amount</label>
-              <p className="text-sm font-bold text-white mt-1">{tx.estimated_sol?.toFixed(4)} SOL</p>
+              <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Amount</label>
+              <p className="text-lg font-bold font-mono text-zinc-100 mt-1">
+                {tx.estimated_sol?.toFixed(4)} <span className="text-sm text-zinc-500">SOL</span>
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] text-gray-500 uppercase tracking-wide">Agent</label>
-              <p className="text-xs font-mono text-gray-300 mt-1">{tx.agent_id}</p>
+              <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Agent</label>
+              <p className="text-[11px] font-mono text-zinc-300 mt-1">{tx.agent_id}</p>
             </div>
             <div>
-              <label className="text-[10px] text-gray-500 uppercase tracking-wide">Time</label>
-              <p className="text-xs text-gray-300 mt-1">{new Date(tx.timestamp).toLocaleString()}</p>
+              <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Time</label>
+              <p className="text-[11px] text-zinc-300 mt-1">{new Date(tx.timestamp).toLocaleString()}</p>
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-wide">
+            <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">
               Programs ({tx.program_ids?.length ?? 0})
             </label>
-            <div className="mt-2 space-y-1.5">
-              {(tx.program_ids ?? []).map((id: string) => (
-                <div key={id} className="flex items-center gap-2 bg-surface rounded-lg px-3 py-2">
-                  <span className={cn(
-                    "w-1.5 h-1.5 rounded-full shrink-0",
-                    PROGRAM_NAMES[id] ? "bg-success" : "bg-warning"
-                  )} />
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-300">
-                      {PROGRAM_NAMES[id] ?? "Unknown Program"}
-                    </p>
-                    <p className="text-[10px] font-mono text-gray-600 truncate">{id}</p>
+            <div className="mt-2 space-y-1">
+              {(tx.program_ids ?? []).map((id: string) => {
+                const known = PROGRAM_NAMES[id];
+                return (
+                  <div key={id} className="flex items-center gap-2 bg-zinc-800/50 rounded-md px-3 py-2">
+                    <span className={cn(
+                      "w-1.5 h-1.5 rounded-full shrink-0",
+                      known ? "bg-emerald-400" : "bg-amber-400"
+                    )} />
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-zinc-300">{known ?? "Unknown Program"}</p>
+                      <p className="text-[10px] font-mono text-zinc-600 truncate">{id}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           {tx.status === "blocked" && (
-            <div className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3">
-              <p className="text-xs text-danger font-medium">Transaction Blocked</p>
-              <p className="text-[10px] text-danger/70 mt-1">
-                This transaction was intercepted by Sentrix guardrails before reaching the chain.
+            <div className="bg-red-950/30 border border-red-500/20 rounded-md px-4 py-3">
+              <p className="text-[11px] text-red-400 font-medium">Transaction Blocked</p>
+              <p className="text-[10px] text-red-400/60 mt-1">
+                Intercepted by Sentrix guardrails before reaching the chain.
               </p>
             </div>
           )}

@@ -1,14 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   min-height: 100vh;
+  font-variant-numeric: tabular-nums;
 }
 
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: #374151 transparent;
+    scrollbar-color: #27272a transparent;
   }
+}
+
+@layer utilities {
+  .stagger-1 { animation-delay: 75ms; }
+  .stagger-2 { animation-delay: 150ms; }
+  .stagger-3 { animation-delay: 225ms; }
 }

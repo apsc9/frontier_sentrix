@@ -1,7 +1,9 @@
 import { Database } from "bun:sqlite";
 import { nanoid } from "nanoid";
 
-const db = new Database("sentrix.db");
+import { resolve } from "path";
+const dbPath = resolve(import.meta.dir, "..", "..", "sentrix.db");
+const db = new Database(dbPath);
 db.exec("PRAGMA journal_mode = WAL");
 
 // Init tables (same as schema.ts)

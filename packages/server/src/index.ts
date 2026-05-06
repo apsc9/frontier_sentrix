@@ -9,13 +9,27 @@ import { addClient, removeClient, getClientCount } from "./ws/hub.js";
 
 const app = new Hono();
 
-app.use("/*", cors());
+app.use(
+  "/*",
+  cors({
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : "*",
+  })
+);
 
 app.route("/api/agents", agents);
 app.route("/api/events", events);
 app.route("/api/transactions", transactions);
 app.route("/webhook", webhook);
 app.route("/api/anomalies", anomalies);
+
+app.get("/", (c) =>
+  c.json({
+    name: "Sentrix API",
+    version: "0.1.0",
+    description: "Agent observability for Solana",
+    endpoints: ["/health", "/api/agents", "/api/transactions", "/api/events", "/api/anomalies"],
+  })
+);
 
 app.get("/health", (c) =>
   c.json({
@@ -61,5 +75,3 @@ console.log(`
   ║   WebSocket: ws://localhost:${PORT}/ws  ║
   ╚══════════════════════════════════════╝
 `);
-
-export default app;

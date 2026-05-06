@@ -17,11 +17,7 @@ export default function App() {
   const [threatPulse, setThreatPulse] = useState(false);
   const [refreshTick, setRefreshTick] = useState(0);
 
-  useEffect(() => {
-    if (agents.length > 0 && !selectedId) {
-      setSelectedId(agents[0].id);
-    }
-  }, [agents, selectedId]);
+  // Start with global view (no agent selected)
 
   const onWsMessage = useCallback(
     (msg: any) => {
@@ -104,6 +100,27 @@ export default function App() {
           <h2 className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mb-3 px-1">
             Monitored Agents
           </h2>
+          <button
+            onClick={() => setSelectedId(null)}
+            className={cn(
+              "w-full text-left px-3 py-2.5 rounded-lg transition-all text-sm font-medium",
+              selectedId === null
+                ? "bg-brand-600/20 border border-brand-500/30 text-brand-300"
+                : "hover:bg-zinc-800/50 text-zinc-400"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+              All Agents
+              <span className="ml-auto text-[10px] text-zinc-600 font-mono">{agents.length}</span>
+            </div>
+          </button>
+          <div className="border-t border-zinc-800/30 my-2" />
           {agents.length === 0 && (
             <div className="text-center py-8">
               <p className="text-sm text-zinc-600">No agents registered</p>

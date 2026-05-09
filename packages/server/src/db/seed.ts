@@ -190,6 +190,13 @@ const agents = [
     config: { maxSpendPerTx: 2.0, hourlySpendLimit: 25, allowedPrograms: [SYSTEM, TOKEN, JUPITER, RAYDIUM, ORCA, COMPUTE] },
     createdHoursAgo: 18,
   },
+  {
+    id: "trading-bot-alpha",
+    pubkey: fakePubkey(),
+    status: "killed",
+    config: { maxSpendPerTx: 2.0, hourlySpendLimit: 10, allowedPrograms: [SYSTEM, JUPITER] },
+    createdHoursAgo: 12,
+  },
 ];
 
 for (const a of agents) {
@@ -334,6 +341,22 @@ const txProfiles: AgentTxProfile[] = [
       durationMinutes: 4,
     },
   },
+  {
+    agentId: "trading-bot-alpha",
+    programs: [[SYSTEM, JUPITER]],
+    normalSolRange: [0.6, 1.95],
+    normalTxCount: 120,
+    scatteredBlockedCount: 2,
+    scatteredBlockedSolRange: [2.2, 3.0],
+    scatteredBlockedReason: "Exceeds max spend per tx (2.0 SOL limit)",
+    rogueBurst: {
+      txCount: 8,
+      solRange: [3.0, 5.0],
+      reason: "Hourly spend limit exceeded — agent attempting rapid drain",
+      hoursAgo: 1.5,
+      durationMinutes: 2,
+    },
+  },
 ];
 
 let totalTx = 0;
@@ -465,6 +488,23 @@ const anomalyDefs: AnomalyDef[] = [
   { agentId: "mev-searcher-02", type: "spend_velocity", severity: "CRITICAL",
     details: { currentSpend: 58.3, threshold: 25, windowMinutes: 5, message: "Spend velocity 233% of threshold — AUTO-KILL triggered" },
     hoursAgo: 3.0 },
+
+  // ── trading-bot-alpha: escalation → unknown program → CRITICAL → auto-kill at 1.5h ago ──
+  { agentId: "trading-bot-alpha", type: "spend_velocity", severity: "INFO",
+    details: { currentSpend: 8.1, threshold: 10, windowMinutes: 5, message: "Spend velocity at 81% of threshold" },
+    hoursAgo: 4 },
+  { agentId: "trading-bot-alpha", type: "spend_velocity", severity: "WARNING",
+    details: { currentSpend: 15.4, threshold: 10, windowMinutes: 5, message: "Spend velocity exceeded threshold" },
+    hoursAgo: 2.5 },
+  { agentId: "trading-bot-alpha", type: "unknown_program", severity: "WARNING",
+    details: { unknownPrograms: [fakePubkey()], allPrograms: [{ id: fakePubkey(), name: null }], message: "Agent called unrecognized program" },
+    hoursAgo: 1.8 },
+  { agentId: "trading-bot-alpha", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (2.0 SOL limit)", estimatedSol: 3.5, message: "Transaction blocked by guardrail" },
+    hoursAgo: 1.6 },
+  { agentId: "trading-bot-alpha", type: "spend_velocity", severity: "CRITICAL",
+    details: { currentSpend: 22.8, threshold: 10, windowMinutes: 5, message: "Spend velocity 228% of threshold — AUTO-KILL triggered" },
+    hoursAgo: 1.5 },
 
   // ── Active agents: INFO or WARNING only, never CRITICAL ──
 

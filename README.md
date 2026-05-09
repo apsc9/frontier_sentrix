@@ -7,6 +7,7 @@
 [![Built for Colosseum Frontier](https://img.shields.io/badge/Colosseum-Frontier%20Hackathon-6366f1)](https://www.colosseum.org)
 [![Solana Devnet](https://img.shields.io/badge/Solana-Devnet-14F195)](https://solana.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/sentrix-solana-sdk)](https://www.npmjs.com/package/sentrix-solana-sdk)
 
 **[Live Dashboard](https://dashboard-iota-one-39.vercel.app)** | **[API](https://sentrix-server-production.up.railway.app)**
 
@@ -39,7 +40,7 @@ Sentrix provides a complete observability layer for AI agents on Solana:
 ### 5 Lines to Integrate
 
 ```typescript
-import { SentrixClient } from '@sentrix/sdk';
+import { SentrixClient } from 'sentrix-solana-sdk';
 
 const sentrix = new SentrixClient({
   serverUrl: 'https://your-sentrix-server.com',
@@ -66,7 +67,7 @@ await sentrix.sendTransaction(transaction);
                            │
                            ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                        @sentrix/sdk                              │
+│                        sentrix-solana-sdk                              │
 │                                                                  │
 │  ┌──────────────┐   ┌───────────────┐   ┌────────────────────┐  │
 │  │  Interceptor  │   │  Guardrails   │   │    Kill Switch     │  │
@@ -202,7 +203,7 @@ bun run demo/scenario.ts
 ```
 sentrix/
 ├── packages/
-│   ├── sdk/                    # @sentrix/sdk — agent integration
+│   ├── sdk/                    # sentrix-solana-sdk — agent integration
 │   │   └── src/
 │   │       ├── client.ts       # SentrixClient (main entry)
 │   │       ├── guardrails.ts   # Spend limits, program allowlist

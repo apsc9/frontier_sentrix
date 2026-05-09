@@ -1,17 +1,17 @@
-# @sentrix/sdk
+# sentrix-solana-sdk
 
 AI agent observability SDK for Solana. Monitor, audit, and kill-switch autonomous agents transacting on-chain.
 
 ## Install
 
 ```bash
-npm install @sentrix/sdk
+npm install sentrix-solana-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { SentrixClient } from '@sentrix/sdk';
+import { SentrixClient } from 'sentrix-solana-sdk';
 import { Keypair, Connection } from '@solana/web3.js';
 
 const sentrix = new SentrixClient({

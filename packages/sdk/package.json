@@ -1,5 +1,5 @@
 {
-  "name": "@sentrix/sdk",
+  "name": "sentrix-solana-sdk",
   "version": "0.1.0",
   "description": "AI agent observability SDK for Solana — monitor, audit, and kill-switch autonomous agents",
   "type": "module",

@@ -11,6 +11,8 @@
     "dev:dashboard": "bun run --filter @sentrix/dashboard dev",
     "dev:agent": "bun run demo/agent.ts",
     "seed": "SENTRIX_DB_PATH=packages/server/sentrix.db bun run packages/server/src/db/seed.ts",
+    "demo": "bun run demo/scenario.ts",
+    "demo:prod": "SENTRIX_SERVER=https://sentrix-server-production.up.railway.app bun run demo/scenario.ts",
     "dev": "bun run dev:server & bun run dev:dashboard"
   }
 }

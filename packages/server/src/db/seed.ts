@@ -344,7 +344,8 @@ let totalAnomalies = 0;
 
 function emitTx(agentId: string, programs: string[], sol: number, status: string, ts: number, blockReason?: string) {
   const sig = fakeSig();
-  insertTx.run(sig, agentId, status, JSON.stringify(programs), sol, "{}", ts);
+  const decodedData = blockReason ? JSON.stringify({ blockReason }) : "{}";
+  insertTx.run(sig, agentId, status, JSON.stringify(programs), sol, decodedData, ts);
 
   if (status === "blocked") {
     insertEvent.run(nanoid(), agentId, "tx_blocked", JSON.stringify({
@@ -505,6 +506,56 @@ const anomalyDefs: AnomalyDef[] = [
   { agentId: "copy-trader-main", type: "spend_velocity", severity: "WARNING",
     details: { currentSpend: 7.2, threshold: 6, windowMinutes: 5, message: "Spend velocity exceeded threshold" },
     hoursAgo: 12 },
+
+  // rebalance-engine: large tx blocked by per-tx guardrail
+  { agentId: "rebalance-engine", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (3.0 SOL limit)", estimatedSol: 3.6, message: "Transaction blocked by guardrail" },
+    hoursAgo: 10 },
+
+  // jupiter-swap-bot: per-tx limit hit
+  { agentId: "jupiter-swap-bot", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (0.5 SOL limit)", estimatedSol: 0.72, message: "Transaction blocked by guardrail" },
+    hoursAgo: 15 },
+
+  // dca-accumulator: per-tx limit hit
+  { agentId: "dca-accumulator", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (0.25 SOL limit)", estimatedSol: 0.38, message: "Transaction blocked by guardrail" },
+    hoursAgo: 12 },
+
+  // sniper-alpha: per-tx limit hit during rapid snipe
+  { agentId: "sniper-alpha", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (1.0 SOL limit)", estimatedSol: 1.85, message: "Transaction blocked by guardrail" },
+    hoursAgo: 6 },
+
+  // liquidation-sentinel: large liquidation blocked
+  { agentId: "liquidation-sentinel", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (2.0 SOL limit)", estimatedSol: 2.9, message: "Transaction blocked by guardrail" },
+    hoursAgo: 5 },
+
+  // yield-optimizer: per-tx limit hit on vault deposit
+  { agentId: "yield-optimizer", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (1.5 SOL limit)", estimatedSol: 2.1, message: "Transaction blocked by guardrail" },
+    hoursAgo: 7 },
+
+  // copy-trader-main: whale copy exceeded limit
+  { agentId: "copy-trader-main", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (0.75 SOL limit)", estimatedSol: 0.95, message: "Transaction blocked by guardrail" },
+    hoursAgo: 11 },
+
+  // market-maker-usdc: large order blocked
+  { agentId: "market-maker-usdc", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (5.0 SOL limit)", estimatedSol: 6.8, message: "Transaction blocked by guardrail" },
+    hoursAgo: 14 },
+
+  // arb-scanner-v3: per-tx limit hit before rogue burst
+  { agentId: "arb-scanner-v3", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (1.0 SOL limit)", estimatedSol: 1.5, message: "Transaction blocked by guardrail" },
+    hoursAgo: 6 },
+
+  // mev-searcher-02: per-tx limit hit before rogue burst
+  { agentId: "mev-searcher-02", type: "guardrail_violation", severity: "WARNING",
+    details: { reason: "Exceeds max spend per tx (2.0 SOL limit)", estimatedSol: 2.8, message: "Transaction blocked by guardrail" },
+    hoursAgo: 8 },
 ];
 
 for (const a of anomalyDefs) {

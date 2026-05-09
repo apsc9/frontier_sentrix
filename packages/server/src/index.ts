@@ -39,6 +39,13 @@ app.get("/health", (c) =>
   })
 );
 
+app.post("/api/reseed", async (c) => {
+  const seedScript = new URL("./db/seed.ts", import.meta.url).pathname;
+  const proc = Bun.spawn(["bun", "run", seedScript], { stdout: "inherit", stderr: "inherit" });
+  await proc.exited;
+  return c.json({ status: "reseeded", timestamp: Date.now() });
+});
+
 const PORT = parseInt(process.env.PORT ?? "4000");
 
 const server = Bun.serve({
@@ -75,3 +82,16 @@ console.log(`
   ║   WebSocket: ws://localhost:${PORT}/ws  ║
   ╚══════════════════════════════════════╝
 `);
+
+// Auto-reseed every 20h to keep demo data fresh (timestamps are relative to seed time)
+const seedPath = new URL("./db/seed.ts", import.meta.url).pathname;
+
+async function reseed() {
+  console.log("[reseed] Refreshing seed data...");
+  const proc = Bun.spawn(["bun", "run", seedPath], { stdout: "inherit", stderr: "inherit" });
+  await proc.exited;
+  console.log("[reseed] Done.");
+}
+
+const RESEED_INTERVAL = 20 * 60 * 60 * 1000;
+setInterval(reseed, RESEED_INTERVAL);

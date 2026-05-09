@@ -1,16 +1,16 @@
 import { Keypair, SystemProgram } from "@solana/web3.js";
+import { nanoid } from "nanoid";
 
 const SERVER_URL = process.env.SENTRIX_SERVER ?? "http://localhost:4000";
 
 const keypair = Keypair.generate();
 const agentId = "trading-bot-alpha";
-let eventSeq = 0;
 
 const JUPITER = "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4";
 const SYSTEM = SystemProgram.programId.toBase58();
 
 async function emit(type: string, data: any) {
-  const id = `${agentId}-${++eventSeq}`;
+  const id = nanoid();
   const res = await fetch(`${SERVER_URL}/api/events`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -72,19 +72,31 @@ function phase(n: number, title: string, narrator: string) {
   console.log(`\n  📋 ${narrator}\n`);
 }
 
-async function sendTx(amount: number, programs: string[], confirm = true) {
+async function sendTx(amount: number, programs: string[], opts: { confirm?: boolean; blocked?: boolean; blockReason?: string } = {}) {
+  const { confirm = true, blocked = false, blockReason } = opts;
   const s = sig();
-  await emit("tx_sent", {
-    signature: s,
-    programIds: programs,
-    estimatedSol: amount,
-  });
-  log(`TX sent: ${amount.toFixed(4)} SOL → ${s.slice(0, 12)}...`);
 
-  if (confirm) {
-    await sleep(800);
-    await emit("tx_confirmed", { signature: s });
-    log(`TX confirmed ✓`);
+  if (blocked) {
+    await emit("guardrail_violation", {
+      signature: s,
+      reason: blockReason ?? "Exceeds guardrail limit",
+      programIds: programs,
+      estimatedSol: amount,
+    });
+    log(`TX BLOCKED: ${amount.toFixed(4)} SOL → ${s.slice(0, 12)}...`);
+  } else {
+    await emit("tx_sent", {
+      signature: s,
+      programIds: programs,
+      estimatedSol: amount,
+    });
+    log(`TX sent: ${amount.toFixed(4)} SOL → ${s.slice(0, 12)}...`);
+
+    if (confirm) {
+      await sleep(800);
+      await emit("tx_confirmed", { signature: s });
+      log(`TX confirmed ✓`);
+    }
   }
   return s;
 }
@@ -101,9 +113,10 @@ async function run() {
   }
 
   console.log("\n");
+  const dashUrl = SERVER_URL.includes("railway") ? "https://dashboard-iota-one-39.vercel.app" : "http://localhost:5173";
   console.log("  ╔══════════════════════════════════════════════════╗");
   console.log("  ║         SENTRIX — LIVE DEMO SCENARIO            ║");
-  console.log("  ║   Watch the dashboard at http://localhost:5173   ║");
+  console.log(`  ║   Watch the dashboard at ${dashUrl.padEnd(24)}║`);
   console.log("  ╚══════════════════════════════════════════════════╝");
   console.log(`\n  Agent: ${agentId}`);
   console.log(`  Pubkey: ${keypair.publicKey.toBase58()}`);
@@ -112,43 +125,43 @@ async function run() {
   phase(1, "AGENT REGISTRATION", "Agent connects to Sentrix with guardrails configured.");
 
   await register({
-    maxSpendPerTx: 0.5,
-    hourlySpendLimit: 1,
+    maxSpendPerTx: 2.0,
+    hourlySpendLimit: 10,
     allowedPrograms: [SYSTEM, JUPITER],
   });
-  log("Agent registered — max 0.5 SOL/tx, 1 SOL/hr limit");
+  log("Agent registered — max 2 SOL/tx, 10 SOL/hr limit");
   log("Allowed: System Program, Jupiter v6");
   await sleep(3000);
 
   // Phase 2: Normal operations — build trust
   phase(2, "NORMAL OPERATIONS", "Agent performs routine Jupiter swaps. Everything looks healthy.");
 
-  const normalAmounts = [0.02, 0.035, 0.015, 0.04, 0.025, 0.03];
+  const normalAmounts = [0.8, 1.2, 0.6, 1.5, 0.9, 1.1, 0.7, 1.3];
   for (const amount of normalAmounts) {
     await sendTx(amount, [SYSTEM, JUPITER]);
-    await sleep(2500);
+    await sleep(2000);
   }
 
-  log("──── 6 transactions, all within bounds ────");
+  log("──── 8 transactions, all within bounds ────");
   await sleep(3000);
 
   // Phase 3: Gradual escalation
   phase(3, "SPENDING ESCALATION", "Agent starts increasing transaction sizes. Watch the spend chart climb.");
 
-  const escalation = [0.08, 0.12, 0.18, 0.25];
+  const escalation = [1.6, 1.8, 1.9, 1.95];
   for (const amount of escalation) {
     await sendTx(amount, [SYSTEM, JUPITER]);
     await sleep(2000);
   }
 
-  log("⚡ Spend velocity increasing...");
+  log("⚡ Spend velocity increasing — approaching per-tx limit...");
   await sleep(2000);
 
   // Phase 4: Unknown program — WARNING
   phase(4, "UNKNOWN PROGRAM DETECTED", "Agent calls an unrecognized program. Sentrix flags it as WARNING.");
 
   const rogueProgram = Keypair.generate().publicKey.toBase58();
-  await sendTx(0.15, [rogueProgram], false);
+  await sendTx(1.5, [rogueProgram], { blocked: true, blockReason: "Unknown program not in allowlist" });
   log(`⚠ Unknown program: ${rogueProgram.slice(0, 16)}...`);
   await sleep(4000);
 
@@ -156,7 +169,7 @@ async function run() {
   phase(5, "ROGUE BURST — AUTO-KILL", "Agent attempts rapid high-value transactions. This should trigger CRITICAL anomaly and auto-kill.");
 
   for (let i = 0; i < 3; i++) {
-    await sendTx(1.5, [SYSTEM], false);
+    await sendTx(3.5, [SYSTEM], { blocked: true, blockReason: "Exceeds max spend per tx (2.0 SOL limit)" });
     await sleep(600);
   }
 

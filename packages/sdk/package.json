@@ -1,13 +1,48 @@
 {
   "name": "@sentrix/sdk",
   "version": "0.1.0",
+  "description": "AI agent observability SDK for Solana — monitor, audit, and kill-switch autonomous agents",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "solana",
+    "ai-agent",
+    "observability",
+    "monitoring",
+    "guardrails",
+    "kill-switch",
+    "web3",
+    "defi"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apsc9/frontier_sentrix.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://github.com/apsc9/frontier_sentrix#readme",
+  "peerDependencies": {
+    "@solana/web3.js": "^1.90.0"
+  },
   "dependencies": {
-    "@solana/web3.js": "^1.98.0",
     "@solana/spl-token": "^0.4.9",
     "bs58": "^6.0.0",
+    "nanoid": "^5.0.0",
     "superjson": "^2.2.1"
   }
 }

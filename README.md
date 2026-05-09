@@ -8,6 +8,8 @@
 [![Solana Devnet](https://img.shields.io/badge/Solana-Devnet-14F195)](https://solana.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+**[Live Dashboard](https://dashboard-iota-one-39.vercel.app)** | **[API](https://sentrix-server-production.up.railway.app)**
+
 ---
 
 ## The Problem
@@ -167,8 +169,8 @@ The delta between intent and reality is where bugs and exploits live.
 
 ```bash
 # Clone
-git clone https://github.com/your-username/sentrix.git
-cd sentrix
+git clone https://github.com/apsc9/frontier_sentrix.git
+cd frontier_sentrix
 
 # Install dependencies
 bun install

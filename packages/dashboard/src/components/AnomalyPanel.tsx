@@ -13,6 +13,7 @@ const typeLabels: Record<string, string> = {
   unknown_program: "Unknown Program",
   large_transaction: "Large Transaction",
   failed_tx_spike: "Failed TX Spike",
+  guardrail_violation: "Guardrail Violation",
 };
 
 export function AnomalyPanel({ agentId, tick }: { agentId?: string; tick: number }) {
@@ -84,6 +85,14 @@ export function AnomalyPanel({ agentId, tick }: { agentId?: string; tick: number
                   {a.type === "unknown_program" && a.details?.unknownPrograms && (
                     <span className="font-mono">
                       {a.details.unknownPrograms.length} unknown: {a.details.unknownPrograms[0]?.slice(0, 12)}…
+                    </span>
+                  )}
+                  {a.type === "guardrail_violation" && a.details && (
+                    <span>
+                      {a.details.reason}
+                      {a.details.estimatedSol && (
+                        <span className="text-zinc-600"> · {a.details.estimatedSol.toFixed(2)} SOL</span>
+                      )}
                     </span>
                   )}
                 </div>

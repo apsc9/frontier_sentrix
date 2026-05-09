@@ -20,17 +20,33 @@ export function SpendChart({ agentId, tick, selectedAgent }: SpendChartProps) {
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-    api.transactions.list({ agentId, limit: 100 }).then((txs) => {
-      const buckets = new Map<string, number>();
-      for (const tx of txs) {
-        if (tx.status === "blocked") continue;
-        const d = new Date(tx.timestamp);
-        const key = `${d.getHours().toString().padStart(2, "0")}:${(Math.floor(d.getMinutes() / 10) * 10).toString().padStart(2, "0")}`;
+    api.transactions.list({ agentId, limit: 2500 }).then((txs) => {
+      const confirmed = txs
+        .filter((tx: any) => tx.status !== "blocked")
+        .sort((a: any, b: any) => a.timestamp - b.timestamp);
+
+      if (confirmed.length === 0) { setData([]); return; }
+
+      const timeRange = confirmed[confirmed.length - 1].timestamp - confirmed[0].timestamp;
+      const targetBuckets = 30;
+      const minBucket = timeRange < 120_000 ? 3_000 : 60_000;
+      const bucketMs = Math.max(timeRange / targetBuckets, minBucket);
+
+      const buckets = new Map<number, number>();
+      for (const tx of confirmed) {
+        const key = Math.floor(tx.timestamp / bucketMs) * bucketMs;
         buckets.set(key, (buckets.get(key) ?? 0) + (tx.estimated_sol ?? 0));
       }
+
       const sorted = [...buckets.entries()]
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([time, sol]) => ({ time, sol: +sol.toFixed(4) }));
+        .sort(([a], [b]) => a - b)
+        .map(([ts, sol]) => {
+          const d = new Date(ts);
+          const label = timeRange < 600_000
+            ? `${d.getHours()}:${d.getMinutes().toString().padStart(2, "0")}:${d.getSeconds().toString().padStart(2, "0")}`
+            : `${d.getHours().toString().padStart(2, "0")}:${(Math.floor(d.getMinutes() / 10) * 10).toString().padStart(2, "0")}`;
+          return { time: label, sol: +sol.toFixed(4) };
+        });
       setData(sorted);
     });
   }, [agentId, tick]);
@@ -81,7 +97,7 @@ export function SpendChart({ agentId, tick, selectedAgent }: SpendChartProps) {
               fontSize: 11,
               color: "#d4d4d8",
             }}
-            formatter={(value: number) => [`${value.toFixed(4)} SOL`, "Spend"]}
+            formatter={(value: number) => [`${value.toFixed(2)} SOL`, "Spend"]}
           />
           {threshold && (
             <ReferenceLine

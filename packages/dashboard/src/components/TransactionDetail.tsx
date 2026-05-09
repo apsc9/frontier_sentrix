@@ -96,7 +96,7 @@ export function TransactionDetail({ tx, onClose }: TransactionDetailProps) {
             <div className="bg-red-950/30 border border-red-500/20 rounded-md px-4 py-3">
               <p className="text-[11px] text-red-400 font-medium">Transaction Blocked</p>
               <p className="text-[10px] text-red-400/60 mt-1">
-                Intercepted by Sentrix guardrails before reaching the chain.
+                {tx.decoded_data?.blockReason ?? "Intercepted by Sentrix guardrails before reaching the chain."}
               </p>
             </div>
           )}

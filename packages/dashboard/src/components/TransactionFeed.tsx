@@ -33,9 +33,15 @@ function TxRow({ tx, onClick }: { tx: any; onClick: () => void }) {
           <p className="font-mono text-[11px] truncate text-zinc-300">
             {tx.signature}
           </p>
-          <p className="text-[10px] text-zinc-600 mt-0.5 font-mono">
-            {new Date(tx.timestamp).toLocaleTimeString()}
-          </p>
+          {tx.status === "blocked" && tx.decoded_data?.blockReason ? (
+            <p className="text-[10px] text-red-400/60 mt-0.5 truncate">
+              {tx.decoded_data.blockReason}
+            </p>
+          ) : (
+            <p className="text-[10px] text-zinc-600 mt-0.5 font-mono">
+              {new Date(tx.timestamp).toLocaleTimeString()}
+            </p>
+          )}
         </div>
       </div>
       <div className="text-right shrink-0">

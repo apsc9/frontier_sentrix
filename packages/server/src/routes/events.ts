@@ -29,7 +29,30 @@ events.post("/", async (c) => {
         event.timestamp
       );
     }
+  }
 
+  if (event.type === "tx_confirmed" && event.data.signature) {
+    db.query(
+      `UPDATE transactions SET status = 'confirmed' WHERE signature = ?`
+    ).run(event.data.signature);
+  }
+
+  if (event.type === "tx_blocked" || event.type === "guardrail_violation") {
+    db.query(
+      `INSERT OR IGNORE INTO transactions (signature, agent_id, status, program_ids, estimated_sol, decoded_data, timestamp)
+       VALUES (?, ?, 'blocked', ?, ?, ?, ?)`
+    ).run(
+      `blocked_${event.id}`,
+      event.agentId,
+      JSON.stringify(event.data.programIds ?? []),
+      event.data.estimatedSol ?? 0,
+      JSON.stringify({ blockReason: event.data.reason ?? "Guardrail violation" }),
+      event.timestamp
+    );
+  }
+
+  if (event.type === "tx_sent" || event.type === "tx_intent" || event.type === "tx_blocked" || event.type === "guardrail_violation") {
+    const data = event.data;
     const agent = db
       .query<any, [string]>("SELECT config FROM agents WHERE id = ?")
       .get(event.agentId);
@@ -43,25 +66,6 @@ events.post("/", async (c) => {
       allowedPrograms: config.allowedPrograms ?? [],
       spendThreshold: config.hourlySpendLimit ?? 5,
     });
-  }
-
-  if (event.type === "tx_confirmed" && event.data.signature) {
-    db.query(
-      `UPDATE transactions SET status = 'confirmed' WHERE signature = ?`
-    ).run(event.data.signature);
-  }
-
-  if (event.type === "tx_blocked" || event.type === "guardrail_violation") {
-    db.query(
-      `INSERT OR IGNORE INTO transactions (signature, agent_id, status, program_ids, estimated_sol, timestamp)
-       VALUES (?, ?, 'blocked', ?, ?, ?)`
-    ).run(
-      `blocked_${event.id}`,
-      event.agentId,
-      JSON.stringify(event.data.programIds ?? []),
-      event.data.estimatedSol ?? 0,
-      event.timestamp
-    );
   }
 
   broadcast({ type: "event", event });

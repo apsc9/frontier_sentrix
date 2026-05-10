@@ -58,6 +58,7 @@ events.post("/", async (c) => {
       .get(event.agentId);
 
     const config = agent ? JSON.parse(agent.config) : {};
+    const isBlocked = event.type === "tx_blocked" || event.type === "guardrail_violation";
 
     runDetection({
       agentId: event.agentId,
@@ -65,6 +66,9 @@ events.post("/", async (c) => {
       estimatedSol: data.estimatedSol ?? 0,
       allowedPrograms: config.allowedPrograms ?? [],
       spendThreshold: config.hourlySpendLimit ?? 5,
+      maxSpendPerTx: config.maxSpendPerTx,
+      wasBlocked: isBlocked,
+      blockReason: isBlocked ? (data.reason ?? data.blockReason) : undefined,
     });
   }
 

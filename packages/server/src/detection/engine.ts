@@ -10,6 +10,9 @@ export interface DetectionContext {
   estimatedSol: number;
   allowedPrograms: string[];
   spendThreshold: number;
+  maxSpendPerTx?: number;
+  wasBlocked?: boolean;
+  blockReason?: string;
 }
 
 export function runDetection(ctx: DetectionContext): void {
@@ -45,8 +48,33 @@ export function runDetection(ctx: DetectionContext): void {
     }
   }
 
-  const programCheck = checkPrograms(ctx.programIds, ctx.allowedPrograms);
-  if (programCheck.isAnomaly) {
+  if (ctx.wasBlocked && ctx.blockReason) {
+    const anomaly = {
+      id: nanoid(),
+      agent_id: ctx.agentId,
+      type: "guardrail_violation",
+      severity: "WARNING" as const,
+      details: JSON.stringify({
+        reason: ctx.blockReason,
+        estimatedSol: ctx.estimatedSol,
+        maxSpendPerTx: ctx.maxSpendPerTx,
+      }),
+      timestamp: Date.now(),
+    };
+
+    db.query(
+      `INSERT INTO anomalies (id, agent_id, type, severity, details, timestamp)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(anomaly.id, anomaly.agent_id, anomaly.type, anomaly.severity, anomaly.details, anomaly.timestamp);
+
+    broadcast({
+      type: "anomaly",
+      anomaly: { ...anomaly, details: JSON.parse(anomaly.details) },
+    });
+  }
+
+  const programCheck = !ctx.wasBlocked ? checkPrograms(ctx.programIds, ctx.allowedPrograms) : null;
+  if (programCheck?.isAnomaly) {
     const anomaly = {
       id: nanoid(),
       agent_id: ctx.agentId,

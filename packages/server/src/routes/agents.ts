@@ -98,14 +98,19 @@ agents.delete("/:id/kill", (c) => {
 agents.put("/:id/config", async (c) => {
   const db = getDb();
   const agentId = c.req.param("id");
-  const config = await c.req.json();
+  const incoming = await c.req.json();
+
+  const existing = db
+    .query<any, [string]>("SELECT config FROM agents WHERE id = ?")
+    .get(agentId);
+  const merged = { ...(existing ? JSON.parse(existing.config) : {}), ...incoming };
 
   db.query(
     `UPDATE agents SET config = ?, updated_at = ? WHERE id = ?`
-  ).run(JSON.stringify(config), Date.now(), agentId);
+  ).run(JSON.stringify(merged), Date.now(), agentId);
 
-  broadcastToAgent(agentId, { type: "config_update", config });
-  broadcast({ type: "config_update", agentId, config });
+  broadcastToAgent(agentId, { type: "config_update", config: merged });
+  broadcast({ type: "config_update", agentId, config: merged });
 
   return c.json({ ok: true });
 });

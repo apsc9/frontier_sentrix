@@ -10,7 +10,7 @@ interface GuardrailsConfigProps {
 
 export function GuardrailsConfig({ agent, onSave }: GuardrailsConfigProps) {
   const config = agent.config ?? {};
-  const [maxSpend, setMaxSpend] = useState(String(config.maxSpendPerTx ?? 0.5));
+  const [maxSpend, setMaxSpend] = useState(String(config.maxSpendPerTx ?? 0.1));
   const [hourlyLimit, setHourlyLimit] = useState(String(config.hourlySpendLimit ?? 5));
   const [programs, setPrograms] = useState((config.allowedPrograms ?? []).join("\n"));
   const [saving, setSaving] = useState(false);

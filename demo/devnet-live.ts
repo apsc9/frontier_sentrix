@@ -272,6 +272,11 @@ async function run() {
 
   // Restore guardrails for recovery phase
   sentrix.updateGuardrails({ hourlySpendLimit: 5.0 });
+  await fetch(`${SERVER_URL}/api/agents/devnet-live-agent/config`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ maxSpendPerTx: 0.08, hourlySpendLimit: 5.0, allowedPrograms: [SYSTEM] }),
+  });
   await sleep(2000);
 
   // ═══════════════════════════════════════════════════

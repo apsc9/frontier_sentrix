@@ -2,6 +2,14 @@ import { useEffect } from "react";
 import { cn } from "../lib/cn";
 import { PROGRAM_NAMES } from "../lib/programs";
 
+function isRealSignature(sig: string): boolean {
+  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_");
+}
+
+function explorerUrl(sig: string): string {
+  return `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
+}
+
 const statusStyles: Record<string, string> = {
   confirmed: "bg-emerald-500/15 text-emerald-400",
   sent: "bg-amber-500/15 text-amber-400",
@@ -38,7 +46,19 @@ export function TransactionDetail({ tx, onClose }: TransactionDetailProps) {
         <div className="p-5 space-y-4">
           <div>
             <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Signature</label>
-            <p className="text-[11px] font-mono text-zinc-300 mt-1 break-all select-all">{tx.signature}</p>
+            {isRealSignature(tx.signature) ? (
+              <a
+                href={explorerUrl(tx.signature)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 mt-1 break-all block underline underline-offset-2 decoration-emerald-400/30 hover:decoration-emerald-400/60 transition-colors"
+              >
+                {tx.signature}
+                <span className="inline-block ml-1.5 text-[9px] text-emerald-500/60 no-underline">↗ Explorer</span>
+              </a>
+            ) : (
+              <p className="text-[11px] font-mono text-zinc-300 mt-1 break-all select-all">{tx.signature}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

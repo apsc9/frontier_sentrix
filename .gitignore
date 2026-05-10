@@ -12,3 +12,5 @@ dist/
 CLAUDE.md
 docs/
 .vercel
+.npmrc
+*-keypair.json

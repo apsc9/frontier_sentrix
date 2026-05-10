@@ -21,7 +21,7 @@ export function checkSpendVelocity(
     .query<{ total: number }, [string, number]>(
       `SELECT COALESCE(SUM(estimated_sol), 0) as total
        FROM transactions
-       WHERE agent_id = ? AND timestamp > ?`
+       WHERE agent_id = ? AND timestamp > ? AND status != 'blocked'`
     )
     .get(agentId, since);
 

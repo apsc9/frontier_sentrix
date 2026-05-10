@@ -3,8 +3,8 @@ import {
   type Keypair,
   type SendOptions,
   type TransactionSignature,
-  type Transaction,
-  type VersionedTransaction,
+  Transaction,
+  VersionedTransaction,
 } from "@solana/web3.js";
 import { nanoid } from "nanoid";
 import type { SentrixConfig, GuardrailsConfig, AgentEvent, SentrixTransaction } from "./types.js";
@@ -88,10 +88,18 @@ export class SentrixClient {
     }
 
     try {
-      const signature = await this.connection.sendTransaction(
-        tx as any,
-        options
-      );
+      let signature: TransactionSignature;
+      if ("version" in tx) {
+        signature = await this.connection.sendTransaction(
+          tx as VersionedTransaction,
+          options
+        );
+      } else {
+        signature = await this.connection.sendRawTransaction(
+          (tx as Transaction).serialize(),
+          options
+        );
+      }
 
       this.recordSpend(check.estimatedSol);
 

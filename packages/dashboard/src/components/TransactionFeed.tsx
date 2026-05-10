@@ -3,6 +3,10 @@ import { api } from "../lib/api";
 import { cn } from "../lib/cn";
 import { TransactionDetail } from "./TransactionDetail";
 
+function isRealSignature(sig: string): boolean {
+  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_");
+}
+
 const statusColors: Record<string, string> = {
   sent: "text-amber-400",
   confirmed: "text-emerald-400",
@@ -30,9 +34,23 @@ function TxRow({ tx, onClick }: { tx: any; onClick: () => void }) {
           statusDots[tx.status] ?? "bg-zinc-500"
         )} />
         <div className="min-w-0">
-          <p className="font-mono text-[11px] truncate text-zinc-300">
-            {tx.signature}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-mono text-[11px] truncate text-zinc-300">
+              {tx.signature}
+            </p>
+            {isRealSignature(tx.signature) && tx.status !== "blocked" && (
+              <a
+                href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0 text-[9px] text-emerald-500/50 hover:text-emerald-400 transition-colors"
+                title="View on Solana Explorer"
+              >
+                ↗
+              </a>
+            )}
+          </div>
           {tx.status === "blocked" && tx.decoded_data?.blockReason ? (
             <p className="text-[10px] text-red-400/60 mt-0.5 truncate">
               {tx.decoded_data.blockReason}

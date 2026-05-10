@@ -1,6 +1,6 @@
 {
   "name": "sentrix-solana-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI agent observability SDK for Solana — monitor, audit, and kill-switch autonomous agents",
   "type": "module",
   "main": "dist/index.js",

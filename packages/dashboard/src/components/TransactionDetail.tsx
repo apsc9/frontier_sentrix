@@ -3,7 +3,7 @@ import { cn } from "../lib/cn";
 import { PROGRAM_NAMES } from "../lib/programs";
 
 function isRealSignature(sig: string): boolean {
-  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_");
+  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_") && !sig.startsWith("seed_");
 }
 
 function explorerUrl(sig: string): string {

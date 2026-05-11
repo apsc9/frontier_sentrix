@@ -71,8 +71,8 @@ function fakePubkey(): string {
 function fakeSig(): string {
   const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   let s = "";
-  for (let i = 0; i < 88; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
+  for (let i = 0; i < 83; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return "seed_" + s;
 }
 
 function randomChoice<T>(arr: T[]): T {

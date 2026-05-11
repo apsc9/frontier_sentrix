@@ -4,7 +4,7 @@ import { cn } from "../lib/cn";
 import { TransactionDetail } from "./TransactionDetail";
 
 function isRealSignature(sig: string): boolean {
-  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_");
+  return sig.length >= 80 && !sig.startsWith("blocked_") && !sig.startsWith("sim_") && !sig.startsWith("seed_");
 }
 
 const statusColors: Record<string, string> = {

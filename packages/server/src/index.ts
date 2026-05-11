@@ -6,6 +6,7 @@ import transactions from "./routes/transactions.js";
 import webhook from "./routes/webhook.js";
 import anomalies from "./routes/anomalies.js";
 import { addClient, removeClient, getClientCount } from "./ws/hub.js";
+import { startDevnetRefresh } from "./cron/devnet-refresh.js";
 
 const app = new Hono();
 
@@ -95,3 +96,5 @@ async function reseed() {
 
 const RESEED_INTERVAL = 20 * 60 * 60 * 1000;
 setInterval(reseed, RESEED_INTERVAL);
+
+startDevnetRefresh();

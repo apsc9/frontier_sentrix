@@ -245,16 +245,7 @@ interface AgentTxProfile {
 }
 
 const txProfiles: AgentTxProfile[] = [
-  // ── Devnet live agent (small System Program transfers) ──
-  {
-    agentId: "devnet-live-agent",
-    programs: [[SYSTEM]],
-    normalSolRange: [0.005, 0.07],
-    normalTxCount: 45,
-    scatteredBlockedCount: 3,
-    scatteredBlockedSolRange: [0.15, 0.5],
-    scatteredBlockedReason: "Exceeds max spend per tx (0.08 SOL limit)",
-  },
+  // ── devnet-live-agent excluded: only real devnet txs from demo/auto-refresh ──
   // ── Active agents ──
   {
     agentId: "jupiter-swap-bot",
@@ -528,13 +519,7 @@ const anomalyDefs: AnomalyDef[] = [
 
   // ── Active agents: INFO or WARNING only, never CRITICAL ──
 
-  // devnet-live-agent: healthy, one spend blip + one guardrail hit
-  { agentId: "devnet-live-agent", type: "spend_velocity", severity: "INFO",
-    details: { currentSpend: 3.9, threshold: 5, windowMinutes: 5, message: "Spend velocity at 78% of threshold" },
-    hoursAgo: 3 },
-  { agentId: "devnet-live-agent", type: "guardrail_violation", severity: "WARNING",
-    details: { reason: "Exceeds max spend per tx (0.08 SOL limit)", estimatedSol: 0.2, message: "Transaction blocked by guardrail" },
-    hoursAgo: 2 },
+  // devnet-live-agent excluded: anomalies come from real demo runs only
 
   // sniper-alpha: occasional velocity spikes from rapid-fire sniping
   { agentId: "sniper-alpha", type: "spend_velocity", severity: "INFO",

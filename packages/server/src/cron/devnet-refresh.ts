@@ -42,11 +42,11 @@ function emitEvent(agentId: string, type: string, data: Record<string, any>, ts:
   broadcast({ type: "event", event: { id, agentId, type, data, timestamp: ts } });
 }
 
-function recordTx(sig: string, agentId: string, sol: number, programs: string[], status: string, ts: number) {
+function recordTx(sig: string, agentId: string, sol: number, programs: string[], status: string, ts: number, decodedData?: Record<string, any>) {
   const db = getDb();
   db.query(
-    "INSERT OR IGNORE INTO transactions (signature, agent_id, status, program_ids, estimated_sol, decoded_data, timestamp) VALUES (?, ?, ?, ?, ?, '{}', ?)"
-  ).run(sig, agentId, status, JSON.stringify(programs), sol, ts);
+    "INSERT OR IGNORE INTO transactions (signature, agent_id, status, program_ids, estimated_sol, decoded_data, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(sig, agentId, status, JSON.stringify(programs), sol, JSON.stringify(decodedData ?? {}), ts);
 }
 
 async function backfillFromChain() {
@@ -224,7 +224,7 @@ function simulateBlockedTxs() {
     const sig = fakeSig();
     const ts = Date.now() - Math.floor(Math.random() * 60000);
 
-    recordTx(sig, AGENT_ID, scenario.sol, scenario.programs, "blocked", ts);
+    recordTx(sig, AGENT_ID, scenario.sol, scenario.programs, "blocked", ts, { blockReason: scenario.reason });
 
     emitEvent(AGENT_ID, "tx_blocked", {
       signature: sig,

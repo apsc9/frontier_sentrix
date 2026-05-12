@@ -4,7 +4,8 @@ let db: Database;
 
 export function getDb(): Database {
   if (!db) {
-    db = new Database("sentrix.db");
+    const dbPath = process.env.SENTRIX_DB_PATH ?? "sentrix.db";
+    db = new Database(dbPath);
     db.exec("PRAGMA journal_mode = WAL");
     initTables(db);
   }

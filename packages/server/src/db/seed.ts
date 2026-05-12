@@ -44,7 +44,18 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_anomalies_agent ON anomalies(agent_id, timestamp DESC);
 `);
 
-db.exec("DELETE FROM anomalies; DELETE FROM transactions; DELETE FROM events; DELETE FROM agents;");
+// ── Wipe all data EXCEPT devnet-live-agent (real Solana txs) ──
+const DEVNET_AGENT_ID = "devnet-live-agent";
+
+const preserved = db.query("SELECT COUNT(*) as c FROM transactions WHERE agent_id = ?").get(DEVNET_AGENT_ID) as any;
+console.log(`[seed] Preserving devnet-live-agent: ${preserved?.c ?? 0} txs`);
+
+db.exec(`
+  DELETE FROM anomalies WHERE agent_id != '${DEVNET_AGENT_ID}';
+  DELETE FROM transactions WHERE agent_id != '${DEVNET_AGENT_ID}';
+  DELETE FROM events WHERE agent_id != '${DEVNET_AGENT_ID}';
+  DELETE FROM agents WHERE id != '${DEVNET_AGENT_ID}';
+`);
 
 // ── Real Solana program IDs ──
 const SYSTEM = "11111111111111111111111111111111";
@@ -89,7 +100,7 @@ const h24 = 24 * h1;
 
 // ── Prepared statements ──
 const insertAgent = db.prepare(
-  "INSERT INTO agents (id, pubkey, status, config, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
+  "INSERT OR REPLACE INTO agents (id, pubkey, status, config, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
 );
 const insertTx = db.prepare(
   "INSERT INTO transactions (signature, agent_id, status, program_ids, estimated_sol, decoded_data, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)"
@@ -656,5 +667,6 @@ console.log(`
   ║   Saved:         ${pad(totalSaved.toFixed(2) + " SOL", 25)}║
   ║   Anomalies:     ${pad(totalAnomalies, 25)}║
   ║   Kill events:   ${pad(killEvents.length, 25)}║
+  ║   Preserved:     ${pad((preserved?.c ?? 0) + " devnet-live txs", 25)}║
   ╚════════════════════════════════════════════╝
 `);

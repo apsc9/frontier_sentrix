@@ -5,8 +5,10 @@ import events from "./routes/events.js";
 import transactions from "./routes/transactions.js";
 import webhook from "./routes/webhook.js";
 import anomalies from "./routes/anomalies.js";
+import { getDb } from "./db/schema.js";
 import { addClient, removeClient, getClientCount } from "./ws/hub.js";
 import { startDevnetRefresh } from "./cron/devnet-refresh.js";
+import { startDevnetValidation } from "./cron/devnet-validate.js";
 
 const app = new Hono();
 
@@ -39,6 +41,18 @@ app.get("/health", (c) =>
     uptime: process.uptime(),
   })
 );
+
+app.post("/api/admin/cleanup-fake-blocked", (c) => {
+  const db = getDb();
+  const fakes = db.query(
+    "SELECT signature FROM transactions WHERE agent_id = 'devnet-live-agent' AND status = 'blocked' AND signature NOT LIKE 'blocked_%' AND signature NOT LIKE 'seed_%'"
+  ).all() as any[];
+  for (const row of fakes) {
+    db.query("DELETE FROM transactions WHERE signature = ?").run(row.signature);
+    db.query("DELETE FROM events WHERE agent_id = 'devnet-live-agent' AND data LIKE ?").run(`%${row.signature}%`);
+  }
+  return c.json({ deleted: fakes.length, signatures: fakes.map((r: any) => r.signature.slice(0, 30)) });
+});
 
 app.post("/api/reseed", async (c) => {
   const seedScript = new URL("./db/seed.ts", import.meta.url).pathname;
@@ -84,17 +98,5 @@ console.log(`
   ╚══════════════════════════════════════╝
 `);
 
-// Auto-reseed every 20h to keep demo data fresh (timestamps are relative to seed time)
-const seedPath = new URL("./db/seed.ts", import.meta.url).pathname;
-
-async function reseed() {
-  console.log("[reseed] Refreshing seed data...");
-  const proc = Bun.spawn(["bun", "run", seedPath], { stdout: "inherit", stderr: "inherit" });
-  await proc.exited;
-  console.log("[reseed] Done.");
-}
-
-const RESEED_INTERVAL = 20 * 60 * 60 * 1000;
-setInterval(reseed, RESEED_INTERVAL);
-
 startDevnetRefresh();
+startDevnetValidation();

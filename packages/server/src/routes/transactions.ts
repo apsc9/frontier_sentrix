@@ -41,12 +41,11 @@ transactions.get("/", (c) => {
 transactions.get("/stats", (c) => {
   const db = getDb();
   const agentId = c.req.query("agentId");
-  const since = Date.now() - 24 * 60 * 60 * 1000; // 24h
 
   const baseWhere = agentId
-    ? "WHERE agent_id = ? AND timestamp > ?"
-    : "WHERE timestamp > ?";
-  const baseParams = agentId ? [agentId, since] : [since];
+    ? "WHERE agent_id = ?"
+    : "WHERE 1=1";
+  const baseParams = agentId ? [agentId] : [];
 
   const total = db
     .query<{ count: number }, any[]>(`SELECT COUNT(*) as count FROM transactions ${baseWhere}`)

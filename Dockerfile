@@ -13,4 +13,6 @@ COPY packages/server/src/ packages/server/src/
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "bun run packages/server/src/db/seed.ts && bun run packages/server/src/index.ts"]
+ENV SENTRIX_DB_PATH=/data/sentrix.db
+
+CMD ["sh", "-c", "mkdir -p /data && bun run packages/server/src/db/seed.ts && bun run packages/server/src/index.ts"]

@@ -46,7 +46,7 @@ export function TransactionDetail({ tx, onClose }: TransactionDetailProps) {
         <div className="p-5 space-y-4">
           <div>
             <label className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">Signature</label>
-            {isRealSignature(tx.signature) ? (
+            {isRealSignature(tx.signature) && tx.status !== "blocked" ? (
               <a
                 href={explorerUrl(tx.signature)}
                 target="_blank"

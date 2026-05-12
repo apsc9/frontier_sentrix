@@ -42,16 +42,16 @@ app.get("/health", (c) =>
   })
 );
 
-app.post("/api/admin/cleanup-fake-blocked", (c) => {
+app.post("/api/admin/cleanup-blocked", (c) => {
   const db = getDb();
-  const fakes = db.query(
-    "SELECT signature FROM transactions WHERE agent_id = 'devnet-live-agent' AND status = 'blocked' AND signature NOT LIKE 'blocked_%' AND signature NOT LIKE 'seed_%'"
+  const blocked = db.query(
+    "SELECT signature FROM transactions WHERE agent_id = 'devnet-live-agent' AND status = 'blocked'"
   ).all() as any[];
-  for (const row of fakes) {
+  for (const row of blocked) {
     db.query("DELETE FROM transactions WHERE signature = ?").run(row.signature);
     db.query("DELETE FROM events WHERE agent_id = 'devnet-live-agent' AND data LIKE ?").run(`%${row.signature}%`);
   }
-  return c.json({ deleted: fakes.length, signatures: fakes.map((r: any) => r.signature.slice(0, 30)) });
+  return c.json({ deleted: blocked.length });
 });
 
 app.post("/api/reseed", async (c) => {
